@@ -1,45 +1,47 @@
-# fo_live_feed.py
-
 from smartapi import SmartConnect
-import pyotp
-import pandas as pd
 from datetime import datetime
+import pandas as pd
+import time
+import os
 
-# Angel One Credentials (replace placeholders)
-api_key = "YOUR_API_KEY"
-client_code = "YOUR_CLIENT_CODE"
-pwd = "YOUR_PASSWORD"
-totp_key = "YOUR_TOTP_SECRET"
-api_secret = "YOUR_API_SECRET"
+# 🔐 Replace with your real credentials
+API_KEY = "your_api_key"
+CLIENT_ID = "your_client_id"
+PWD = "your_password"
+TOTP = "your_totp"
 
-# TOTP generation
-totp = pyotp.TOTP(totp_key).now()
+obj = SmartConnect(api_key=API_KEY)
+data = obj.generateSession(CLIENT_ID, PWD, TOTP)
 
-# Login
-obj = SmartConnect(api_key=api_key)
-session_data = obj.generateSession(client_code, pwd, totp)
-
-# Function to get live OI snapshot (mocked logic for now)
-def fetch_pcr_data(symbol):
-    # Replace with real Angel One symbol token
-    # This is mocked data. Replace with actual API call and F&O parsing.
-    time_now = datetime.now().strftime("%H:%M")
+# 🔍 Function to fetch Option Chain OI
+def get_oi_data(symbol):
+    # Replace this with real F&O instrument token from Angel One
+    # Sample data structure (replace it with real token + logic)
+    call_oi = 2500000  # Replace this
+    put_oi = 1900000   # Replace this
+    pcr = round(put_oi / call_oi, 2)
+    signal = "BUY" if pcr > 1 else "SELL"
     return {
-        "Time": time_now,
-        "Call OI": 2500000,
-        "Put OI": 3200000,
-        "Diff": 3200000 - 2500000,
-        "PCR": round(3200000 / 2500000, 2),
-        "Signal": "BUY" if round(3200000 / 2500000, 2) > 1 else "SELL"
+        "Time": datetime.now().strftime("%H:%M"),
+        "Call OI": call_oi,
+        "Put OI": put_oi,
+        "Diff": put_oi - call_oi,
+        "PCR": pcr,
+        "Signal": signal
     }
 
-# For example
-if __name__ == "__main__":
-    nifty_data = fetch_pcr_data("NIFTY")
-    banknifty_data = fetch_pcr_data("BANKNIFTY")
+# 🔁 Update CSV every 3 mins
+def update_csv(file, symbol):
+    row = get_oi_data(symbol)
+    if os.path.exists(file):
+        df = pd.read_csv(file)
+        if df.empty or df["Time"].iloc[-1] != row["Time"]:
+            df = pd.concat([df, pd.DataFrame([row])])
+            df.to_csv(file, index=False)
+    else:
+        df = pd.DataFrame([row])
+        df.to_csv(file, index=False)
 
-    df_nifty = pd.DataFrame([nifty_data])
-    df_bank = pd.DataFrame([banknifty_data])
-
-    df_nifty.to_csv("nifty_pcr.csv", index=False)
-    df_bank.to_csv("banknifty_pcr.csv", index=False)
+# Call the function
+update_csv("nifty_pcr.csv", "NIFTY")
+update_csv("banknifty_pcr.csv", "BANKNIFTY")
