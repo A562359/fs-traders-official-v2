@@ -1,9 +1,17 @@
 import os
 import pandas as pd
-from datetime import datetime
-import random
+import streamlit as st
+from streamlit_autorefresh import st_autorefresh
 
-# Check if data files exist, else create dummy data
+# 🔁 Auto-refresh every 3 minutes
+st_autorefresh(interval=3 * 60 * 1000, key="refresh")
+
+# 🎯 Dashboard Title
+st.markdown("<h1 style='text-align: center;'>📊 FS Traders Official</h1>", unsafe_allow_html=True)
+st.markdown("<h4 style='text-align: center;'>NIFTY & BANKNIFTY PCR Live Dashboard (Auto-refresh every 3 mins)</h4>", unsafe_allow_html=True)
+st.markdown("---")
+
+# 🧪 Dummy data if CSV not found
 if not os.path.exists("nifty_pcr.csv"):
     dummy_nifty = pd.DataFrame([{
         "Time": "09:30",
@@ -26,31 +34,29 @@ if not os.path.exists("banknifty_pcr.csv"):
     }])
     dummy_bank.to_csv("banknifty_pcr.csv", index=False)
 
+# 📂 Load CSVs
+try:
+    df_nifty = pd.read_csv("nifty_pcr.csv")
+except Exception as e:
+    st.error("❌ NIFTY file not found ya corrupt hai.")
+    df_nifty = pd.DataFrame()
 
-# Simulated Angel One data fetch (replace with actual API later)
-def fetch_live_pcr(symbol):
-    call_oi = random.randint(1000000, 3000000)
-    put_oi = random.randint(1000000, 3000000)
-    time_now = datetime.now().strftime("%H:%M")
-    pcr = round(put_oi / call_oi, 2)
-    signal = "BUY" if pcr > 1 else "SELL"
+try:
+    df_banknifty = pd.read_csv("banknifty_pcr.csv")
+except Exception as e:
+    st.error("❌ BANKNIFTY file not found ya corrupt hai.")
+    df_banknifty = pd.DataFrame()
 
-    return {
-        "Time": time_now,
-        "Call OI": call_oi,
-        "Put OI": put_oi,
-        "Diff": put_oi - call_oi,
-        "PCR": pcr,
-        "Signal": signal
-    }
+# 🔵 NIFTY PCR Table
+st.markdown("### 🔵 NIFTY PCR Overview")
+if not df_nifty.empty:
+    st.table(df_nifty.tail(10))  # Show last 10 entries
+else:
+    st.warning("No NIFTY data available.")
 
-# Append new row to CSV every 3 mins (simulated for now)
-def update_csv(file_name, symbol):
-    df = pd.read_csv(file_name)
-    new_row = fetch_live_pcr(symbol)
-    if df.empty or df["Time"].iloc[-1] != new_row["Time"]:
-        df = pd.concat([df, pd.DataFrame([new_row])])
-        df.to_csv(file_name, index=False)
-
-update_csv("nifty_pcr.csv", "NIFTY")
-update_csv("banknifty_pcr.csv", "BANKNIFTY")
+# 🟢 BANKNIFTY PCR Table
+st.markdown("### 🟢 BANKNIFTY PCR Overview")
+if not df_banknifty.empty:
+    st.table(df_banknifty.tail(10))
+else:
+    st.warning("No BANKNIFTY data available.")
