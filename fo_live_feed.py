@@ -1,41 +1,34 @@
-import os
 import pandas as pd
-from dotenv import load_dotenv
-from angel_one.smartconnect import SmartConnect
+import datetime
+# from smartapi import SmartConnect  # Uncomment this when using real SmartAPI
 
-load_dotenv()
+# Placeholder Angel One credentials (REPLACE with real ones)
+API_KEY = "Pe84PVPR"
+SECRET_KEY = "b7cd6200-c641-4f19-a72e-305f531214d4"
+CLIENT_CODE = "A57362432"
+PASSWORD = "Anis@1978"
+TOTP = "O7VIUTCBCIFCGSRMXCQQK67LPQ"
 
-def get_connection():
-    obj = SmartConnect(api_key=os.getenv("API_KEY"))
-    obj.generateSession(
-        user_id=os.getenv("CLIENT_CODE"),
-        password=os.getenv("PASSWORD"),
-        twoFA=os.getenv("TOTP")
-    )
-    return obj
+def fetch_live_fo_data():
+    # --- PLACEHOLDER SAMPLE DATA ---
+    # Replace this with your Angel One SmartAPI logic
 
-def get_live_fno_data():
-    symbols = ["NIFTY", "BANKNIFTY"]
-    obj = get_connection()
-    fut_data = []
-    opt_data = []
+    nifty_data = pd.DataFrame({
+        "Time": ["09:30", "09:45", "10:00"],
+        "Call OI": [15049875, 21340725, 24376125],
+        "Put OI": [16087800, 21926700, 22910175],
+        "Diff": [-1037925, -586875, -1465950],
+        "PCR": [1.07, 1.03, 0.94],
+        "Signal": ["BUY", "BUY", "SELL"]
+    })
 
-    for symbol in symbols:
-        try:
-            fut_ltp = obj.ltpData("NFO", symbol, symbol + "23JULFUT")['data']['ltp']
-            fut_data.append({"Symbol": symbol, "LTP": fut_ltp, "Instrument": "FUT"})
+    banknifty_data = pd.DataFrame({
+        "Time": ["09:30", "09:45", "10:00"],
+        "Call OI": [182420, 258285, 451885],
+        "Put OI": [412400, 605275, 763875],
+        "Diff": [229980, 346990, 311990],
+        "PCR": [2.26, 2.34, 1.69],
+        "Signal": ["BUY", "BUY", "BUY"]
+    })
 
-            chain = obj.getOptionChain(symbol=symbol)["data"][:10]
-            for row in chain:
-                opt_data.append({
-                    "Symbol": symbol,
-                    "Strike": row["strikePrice"],
-                    "Type": row["optionType"],
-                    "LTP": row["lastPrice"],
-                    "OI": row["openInterest"],
-                    "Volume": row["volume"]
-                })
-        except Exception:
-            continue
-
-    return pd.DataFrame(fut_data), pd.DataFrame(opt_data)
+    return nifty_data, banknifty_data
