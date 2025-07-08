@@ -5,10 +5,11 @@ from datetime import datetime
 from smartapi import SmartConnect
 
 # === Angel One API placeholders ===
-API_KEY = "your_api_key"
-CLIENT_ID = "your_client_id"
-PASSWORD = "your_password"
-TOTP = "your_totp"
+API_KEY=SkyKgmn2
+SECRET_KEY=b3291046-3915-4f78-affe-e606418a8920
+CLIENT_CODE=A57362432
+PASSWORD=Anis@1978
+TOTP=O7VIUTCBCIFCGSRMXCQQK67LPQ
 
 obj = SmartConnect(api_key=API_KEY)
 data = obj.generateSession(CLIENT_ID, PASSWORD, TOTP)
