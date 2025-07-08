@@ -1,14 +1,17 @@
-
 import os
 import pandas as pd
 from dotenv import load_dotenv
-from smartapi import SmartConnect
+from angel_one.smartconnect import SmartConnect
 
 load_dotenv()
 
 def get_connection():
     obj = SmartConnect(api_key=os.getenv("API_KEY"))
-    obj.generateSession(os.getenv("CLIENT_CODE"), os.getenv("PASSWORD"), os.getenv("TOTP"))
+    obj.generateSession(
+        user_id=os.getenv("CLIENT_CODE"),
+        password=os.getenv("PASSWORD"),
+        twoFA=os.getenv("TOTP")
+    )
     return obj
 
 def get_live_fno_data():
@@ -19,30 +22,20 @@ def get_live_fno_data():
 
     for symbol in symbols:
         try:
-            # Get LTP for Futures
-            ltp_data = obj.ltpData("NFO", symbol, symbol + "23JULFUT")
-            fut_data.append({
-                "Symbol": symbol,
-                "LTP": ltp_data['data']['ltp'],
-                "Exchange": "NFO",
-                "Instrument": "FUT"
-            })
+            fut_ltp = obj.ltpData("NFO", symbol, symbol + "23JULFUT")['data']['ltp']
+            fut_data.append({"Symbol": symbol, "LTP": fut_ltp, "Instrument": "FUT"})
 
-            # Get Option Chain (top 5 entries)
-            option_chain = obj.getOptionChain(symbol=symbol)
-            chain = option_chain["data"][:10]  # First 10 rows for simplicity
-
+            chain = obj.getOptionChain(symbol=symbol)["data"][:10]
             for row in chain:
                 opt_data.append({
                     "Symbol": symbol,
-                    "Strike Price": row["strikePrice"],
+                    "Strike": row["strikePrice"],
                     "Type": row["optionType"],
                     "LTP": row["lastPrice"],
-                    "Open Interest": row["openInterest"],
+                    "OI": row["openInterest"],
                     "Volume": row["volume"]
                 })
-
-        except Exception as e:
+        except Exception:
             continue
 
     return pd.DataFrame(fut_data), pd.DataFrame(opt_data)
