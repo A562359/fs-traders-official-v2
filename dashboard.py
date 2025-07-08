@@ -1,30 +1,54 @@
 import streamlit as st
 import pandas as pd
-import time
-from fo_live_feed import fetch_live_fo_data
+from streamlit_autorefresh import st_autorefresh
+from datetime import datetime
 
-st.set_page_config(layout="wide", page_title="📊 FS Traders Official - PCR Dashboard")
+# 🔁 Auto-refresh every 3 mins (180000 ms)
+st_autorefresh(interval=180000, limit=None, key="pcr_dashboard_refresh")
 
-st.title("📊 FS Traders Official")
-st.markdown("### NIFTY & BANKNIFTY PCR Live Dashboard (Auto-refresh every 3 mins)")
+# 🌐 Page settings
+st.set_page_config(page_title="FS Traders Official", layout="wide")
 
-placeholder = st.empty()
+# 🧠 Title
+st.markdown("<h1 style='text-align: center;'>📊 FS Traders Official</h1>", unsafe_allow_html=True)
+st.markdown("<h4 style='text-align: center;'>NIFTY & BANKNIFTY PCR Live Dashboard (Auto-refresh every 3 mins)</h4>", unsafe_allow_html=True)
+st.markdown("---")
 
-def display_dashboard():
-    while True:
-        with placeholder.container():
-            nifty_df, banknifty_df = fetch_live_fo_data()
+# 📥 Dummy data (replace this with your real-time data source)
+nifty_data = {
+    "Time": ["09:30", "09:45", "10:00"],
+    "Call OI": [15049875, 21340725, 24376125],
+    "Put OI": [16087000, 21926700, 22910175],
+    "Diff": [-1037925, -586975, -1465950],
+    "PCR": [1.07, 1.03, 0.94],
+    "Signal": ["BUY", "BUY", "SELL"]
+}
 
-            col1, col2 = st.columns(2)
+banknifty_data = {
+    "Time": ["09:30", "09:45", "10:00"],
+    "Call OI": [182420, 258285, 451885],
+    "Put OI": [412400, 602575, 763875],
+    "Diff": [229980, 344290, 311990],
+    "PCR": [2.26, 2.34, 1.69],
+    "Signal": ["BUY", "BUY", "BUY"]
+}
 
-            with col1:
-                st.subheader("📘 NIFTY PCR Overview")
-                st.dataframe(nifty_df, use_container_width=True)
+nifty_df = pd.DataFrame(nifty_data)
+banknifty_df = pd.DataFrame(banknifty_data)
 
-            with col2:
-                st.subheader("📗 BANKNIFTY PCR Overview")
-                st.dataframe(banknifty_df, use_container_width=True)
+# 🎨 Layout with columns
+col1, col2 = st.columns(2)
 
-        time.sleep(180)
+# 🔷 NIFTY PCR
+with col1:
+    st.markdown("### 🟦 NIFTY PCR Overview")
+    st.dataframe(nifty_df, use_container_width=True)
 
-display_dashboard()
+# 🟩 BANKNIFTY PCR
+with col2:
+    st.markdown("### 🟩 BANKNIFTY PCR Overview")
+    st.dataframe(banknifty_df, use_container_width=True)
+
+# 📅 Footer
+st.markdown("---")
+st.markdown(f"<center><small>Updated at: {datetime.now().strftime('%H:%M:%S')} | Auto-refreshes every 3 minutes</small></center>", unsafe_allow_html=True)
