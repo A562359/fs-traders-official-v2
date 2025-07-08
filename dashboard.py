@@ -1,21 +1,30 @@
-
 import streamlit as st
-from fo_live_feed import get_live_fno_data
-from streamlit_autorefresh import st_autorefresh
-from datetime import datetime
+import pandas as pd
+import time
+from fo_live_feed import fetch_live_fo_data
 
-st.set_page_config(page_title="FS Traders - Live F&O Dashboard", layout="wide")
-st_autorefresh(interval=3 * 60 * 1000, key="fno_refresh")
-st.title("📊 FS Traders Official - Live Futures & Options Prices")
-st.caption(f"Updated: {datetime.now().strftime('%H:%M:%S')} (Auto-refresh every 3 mins)")
+st.set_page_config(layout="wide", page_title="📊 FS Traders Official - PCR Dashboard")
 
-try:
-    fut_df, opt_df = get_live_fno_data()
-    st.subheader("📈 Futures Live Prices")
-    st.dataframe(fut_df, use_container_width=True)
+st.title("📊 FS Traders Official")
+st.markdown("### NIFTY & BANKNIFTY PCR Live Dashboard (Auto-refresh every 3 mins)")
 
-    st.subheader("📉 Options Chain (CE/PE)")
-    st.dataframe(opt_df, use_container_width=True)
+placeholder = st.empty()
 
-except Exception as e:
-    st.error(f"Error fetching data: {e}")
+def display_dashboard():
+    while True:
+        with placeholder.container():
+            nifty_df, banknifty_df = fetch_live_fo_data()
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+                st.subheader("📘 NIFTY PCR Overview")
+                st.dataframe(nifty_df, use_container_width=True)
+
+            with col2:
+                st.subheader("📗 BANKNIFTY PCR Overview")
+                st.dataframe(banknifty_df, use_container_width=True)
+
+        time.sleep(180)
+
+display_dashboard()
