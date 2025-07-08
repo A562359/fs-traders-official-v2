@@ -1,3 +1,6 @@
 streamlit
 pandas
 # smartapi-sdk  # Uncomment if using Angel One Smart API
+streamlit
+streamlit-autorefresh
+pandas
