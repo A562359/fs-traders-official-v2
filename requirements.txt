@@ -1,5 +1,3 @@
 streamlit
-python-dotenv
-angel-one-smartapi==1.0.4
-streamlit-autorefresh
 pandas
+# smartapi-sdk  # Uncomment if using Angel One Smart API
