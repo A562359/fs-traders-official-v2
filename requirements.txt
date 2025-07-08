@@ -1,6 +1,3 @@
-
 streamlit
 python-dotenv
 smartapi-python
-streamlit-autorefresh
-pandas
