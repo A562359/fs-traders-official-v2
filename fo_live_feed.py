@@ -21,12 +21,12 @@ NIFTY_CALL_TOKEN = "2020203"
 NIFTY_PUT_TOKEN = "2020204"
 
 # 🛑 Replace with real tokens if using BANKNIFTY
-BANKNIFTY_CALL_TOKEN = "YOUR_BANKNIFTY_CALL_TOKEN"
-BANKNIFTY_PUT_TOKEN = "YOUR_BANKNIFTY_PUT_TOKEN"
+BANKNIFTY_CALL_TOKEN = "3030303"
+BANKNIFTY_PUT_TOKEN = "3030304"
 
 # 🚀 Connect to Angel One
-obj = SmartConnect(api_key=API_KEY)
-session = obj.generateSession(CLIENT_CODE, PASSWORD, TOTP)
+obj = SmartConnect(api_key=SkyKgmn2)
+session = obj.generateSession(A57362432, Anis@1978,O7VIUTCBCIFCGSRMXCQQK67LPQ)
 
 # 🧠 PCR Calculator
 def fetch_live_pcr(symbol_token_call, symbol_token_put):
