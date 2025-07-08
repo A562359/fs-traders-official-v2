@@ -1,34 +1,45 @@
+# fo_live_feed.py
+
+from smartapi import SmartConnect
+import pyotp
 import pandas as pd
-import datetime
-# from smartapi import SmartConnect  # Uncomment this when using real SmartAPI
+from datetime import datetime
 
-# Placeholder Angel One credentials (REPLACE with real ones)
-API_KEY = "Pe84PVPR"
-SECRET_KEY = "b7cd6200-c641-4f19-a72e-305f531214d4"
-CLIENT_CODE = "A57362432"
-PASSWORD = "Anis@1978"
-TOTP = "O7VIUTCBCIFCGSRMXCQQK67LPQ"
+# Angel One Credentials (replace placeholders)
+api_key = "YOUR_API_KEY"
+client_code = "YOUR_CLIENT_CODE"
+pwd = "YOUR_PASSWORD"
+totp_key = "YOUR_TOTP_SECRET"
+api_secret = "YOUR_API_SECRET"
 
-def fetch_live_fo_data():
-    # --- PLACEHOLDER SAMPLE DATA ---
-    # Replace this with your Angel One SmartAPI logic
+# TOTP generation
+totp = pyotp.TOTP(totp_key).now()
 
-    nifty_data = pd.DataFrame({
-        "Time": ["09:30", "09:45", "10:00"],
-        "Call OI": [15049875, 21340725, 24376125],
-        "Put OI": [16087800, 21926700, 22910175],
-        "Diff": [-1037925, -586875, -1465950],
-        "PCR": [1.07, 1.03, 0.94],
-        "Signal": ["BUY", "BUY", "SELL"]
-    })
+# Login
+obj = SmartConnect(api_key=api_key)
+session_data = obj.generateSession(client_code, pwd, totp)
 
-    banknifty_data = pd.DataFrame({
-        "Time": ["09:30", "09:45", "10:00"],
-        "Call OI": [182420, 258285, 451885],
-        "Put OI": [412400, 605275, 763875],
-        "Diff": [229980, 346990, 311990],
-        "PCR": [2.26, 2.34, 1.69],
-        "Signal": ["BUY", "BUY", "BUY"]
-    })
+# Function to get live OI snapshot (mocked logic for now)
+def fetch_pcr_data(symbol):
+    # Replace with real Angel One symbol token
+    # This is mocked data. Replace with actual API call and F&O parsing.
+    time_now = datetime.now().strftime("%H:%M")
+    return {
+        "Time": time_now,
+        "Call OI": 2500000,
+        "Put OI": 3200000,
+        "Diff": 3200000 - 2500000,
+        "PCR": round(3200000 / 2500000, 2),
+        "Signal": "BUY" if round(3200000 / 2500000, 2) > 1 else "SELL"
+    }
 
-    return nifty_data, banknifty_data
+# For example
+if __name__ == "__main__":
+    nifty_data = fetch_pcr_data("NIFTY")
+    banknifty_data = fetch_pcr_data("BANKNIFTY")
+
+    df_nifty = pd.DataFrame([nifty_data])
+    df_bank = pd.DataFrame([banknifty_data])
+
+    df_nifty.to_csv("nifty_pcr.csv", index=False)
+    df_bank.to_csv("banknifty_pcr.csv", index=False)
